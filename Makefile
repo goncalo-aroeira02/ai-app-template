@@ -1,7 +1,7 @@
 COMPOSE_FILE := docker/docker-compose.yml
 DC := docker-compose -f $(COMPOSE_FILE)
 
-.PHONY: up down build restart logs test seed
+.PHONY: server clean build restart logs test
 
 server:
 	$(DC) up -d
@@ -12,13 +12,10 @@ clean:
 build:
 	$(DC) build
 
-restart: down up
+restart: clean server
 
 logs:
 	$(DC) logs -f
 
 test:
-	$(DC) run --rm app bash -c "cd /app/backend && poetry install --with test && PYTHONPATH=/app/backend poetry run pytest tests/ -v"
-
-seed:
-	$(DC) run --rm app bash -c "cd /app/backend && PYTHONPATH=/app/backend poetry run python scripts/seed_db.py $(FILE)"
+	$(DC) run --rm -e POETRY_VIRTUALENVS_IN_PROJECT=false app bash -c "cd /app/backend && poetry lock && poetry install --with test && PYTHONPATH=/app/backend poetry run pytest tests/ -v"

@@ -1,10 +1,8 @@
 ## Tech Stack
 
-- React (TypeScript) + Vite
-- Tailwind CSS 3.4
+- React 19 (TypeScript) + Vite
+- Tailwind CSS 4
 - TanStack React Query 5 (server state)
-- Zustand 5 (client state — session store)
-- React Hook Form 7 + Zod 4 (form validation)
 - React Router 7 (routing)
 - Web MediaRecorder API (audio capture)
 
@@ -13,23 +11,18 @@
 ```
 src/
 ├── pages/
-│   ├── WordListsPage.tsx     # Browse and select practice sets
-│   ├── SessionPage.tsx       # Main loop: word prompt → record → phoneme feedback
-│   └── ProgressPage.tsx      # Mastery scores per phoneme
+│   └── HomePage.tsx          # Landing page with item list
 ├── components/
-│   └── features/
-│       ├── PhoneticBreakdown/ # Renders IPA sequence; green = correct, red = incorrect
-│       ├── AudioRecorder/     # MediaRecorder state machine (idle → recording → processing)
-│       └── CorrectionHint/   # Popover showing "Sound should be /θ/ as in 'Think'" hint
+│   └── ui/
+│       └── Button.tsx        # Reusable button component
 ├── services/
-│   ├── api.ts                # Axios/fetch base client — all HTTP calls go here
-│   ├── evaluationApi.ts      # POST /evaluate (sends .wav blob, returns PhonemeResult[])
-│   └── wordListApi.ts        # CRUD for practice sets
-├── stores/
-│   └── sessionStore.ts       # Current word, recording state, evaluation results
+│   ├── api.ts                # Base fetch client — all HTTP calls go here
+│   └── itemApi.ts            # GET /items (useItems hook)
 ├── types/
-│   └── index.ts              # Word, PhonemeResult, EvaluationResponse, MasteryScore
-├── App.tsx                   # Router setup, ProtectedRoute, QueryClientProvider
+│   └── index.ts              # ItemResponse type
+├── lib/
+│   └── utils.ts              # cn() — conditional class helper
+├── App.tsx                   # Router setup, QueryClientProvider
 ├── main.tsx                  # React root + StrictMode
 └── index.css                 # Tailwind directives
 ```
@@ -37,11 +30,19 @@ src/
 ## Architecture Rules
 
 - **API layer is the boundary.** All HTTP calls go through `services/api.ts`. Never use `fetch` directly in components.
-- **Server state via React Query.** Use `useQuery` for reads (word lists, progress), `useMutation` for writes (evaluate, save list). Invalidate related queries on success.
-- **Client state via Zustand.** Only the session store uses Zustand. Don't add stores for server-derived data.
-- **Recording is a state machine.** The `AudioRecorder` component cycles through `idle → recording → processing → done`. Never manage raw MediaRecorder events outside this component.
-- **Forms via React Hook Form + Zod.** All forms use `zodResolver`. Define schemas next to the component.
+- **Server state via React Query.** Use `useQuery` for reads, `useMutation` for writes. Invalidate related queries on success.
 - **Path alias:** `@` maps to `./src` (configured in `vite.config.ts` and `tsconfig`).
+- **API base URL:** Set via `VITE_API_URL` env var (defaults to `http://localhost:8000`).
+
+## Adding a New Feature
+
+1. Add TypeScript types in `src/types/index.ts`
+2. Create API service functions in `src/services/yourApi.ts` using `apiFetch`
+3. Create React Query hooks (useQuery/useMutation) in the same service file
+4. Create page component in `src/pages/YourPage.tsx`
+5. Add route in `src/App.tsx`
+6. For reusable UI, add components to `src/components/ui/`
+7. For feature-specific components, create `src/components/features/YourFeature/`
 
 ## Key Domain Concepts
 
@@ -52,7 +53,7 @@ src/
 
 ## Coding Conventions
 
-- Pages are named exports (`export function SessionPage()`).
+- Pages are named exports (`export function HomePage()`).
 - Components are in `components/features/` (feature-specific) or `components/ui/` (generic).
 - Types live in `types/` and mirror backend Pydantic schemas.
 - API services are thin wrappers: one function per endpoint, typed return values.

@@ -1,5 +1,5 @@
 # ---- Base image ----
-FROM python:3.14-slim
+FROM python:3.12-slim
 
 # Install system deps + Node (modern version)
 RUN apt-get update && apt-get install -y curl && \
@@ -13,7 +13,7 @@ WORKDIR /app
 RUN pip install --no-cache-dir poetry
 
 # ---- Copy only dependency files first (cache optimization) ----
-COPY ../backend/pyproject.toml ./backend/
+COPY backend/pyproject.toml ./backend/
 
 WORKDIR /app/backend
 RUN poetry lock
@@ -21,14 +21,14 @@ RUN poetry install --no-root
 
 # ---- Frontend deps ----
 WORKDIR /app
-COPY ../frontend/package.json ./frontend/
+COPY frontend/package.json ./frontend/
 
 WORKDIR /app/frontend
 RUN npm install
 
 # ---- Copy full project ----
 WORKDIR /app
-COPY .. .
+COPY . .
 
 # ---- Build frontend (better than dev server) ----
 WORKDIR /app/frontend
@@ -42,7 +42,7 @@ RUN mkdir -p /app/backend/static && \
 EXPOSE 8000
 
 # ---- Start script ----
-COPY ./docker/start.sh /usr/local/bin/start.sh
+COPY docker/start.sh /usr/local/bin/start.sh
 RUN chmod +x /usr/local/bin/start.sh
 
 CMD ["start.sh"]
