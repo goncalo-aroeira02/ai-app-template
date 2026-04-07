@@ -1,3 +1,9 @@
+---
+applyTo: "frontend/**"
+---
+
+# Frontend Coding Instructions
+
 ## Tech Stack
 
 - React 19 (TypeScript) + Vite

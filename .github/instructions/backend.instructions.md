@@ -1,3 +1,9 @@
+---
+applyTo: "backend/**"
+---
+
+# Backend Coding Instructions
+
 ## Tech Stack
 
 - Python 3.12+
@@ -33,7 +39,7 @@ tests/
 ## Architecture Rules
 
 - **One router per domain.** Each domain gets its own file under `api/v1/`.
-- **Three-layer architecture:** Router → Service → Model. Routers validate input and call services. Services contain business logic and call the ORM. Never do ORM queries directly in router functions.
+- **Three-layer architecture:** Router -> Service -> Model. Routers validate input and call services. Services contain business logic and call the ORM. Never do ORM queries directly in router functions.
 - **All route handlers are `async def`.** Use async natively with aiosqlite.
 - **Dependency injection via `Depends()`.** Use `Annotated[type, Depends(...)]` for type-safe injection. See `DbSession` in routers.
 - **Pydantic models are the contract.** API consumers see Pydantic schemas, never SQLAlchemy models. Map with `model_validate()`.

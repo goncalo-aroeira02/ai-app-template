@@ -216,4 +216,9 @@ Add `backend/tests/test_tasks_router.py` with async test cases using the `async_
 
 ## AI-Assisted Development
 
-Both `backend/CLAUDE.md` and `frontend/CLAUDE.md` contain architecture rules and coding conventions. Point your AI coding assistant at these files to generate code that follows the project's patterns.
+GitHub Copilot coding agent configuration files live under `.github/`:
+
+- **`.github/copilot-instructions.md`** — repo-wide instructions (tech stack, commands, architecture overview, adding a new feature)
+- **`.github/instructions/backend.instructions.md`** — backend-specific rules and conventions (scoped to `backend/**`)
+- **`.github/instructions/frontend.instructions.md`** — frontend-specific rules and conventions (scoped to `frontend/**`)
+- **`.github/copilot-setup-steps.yml`** — environment setup for the Copilot coding agent VM

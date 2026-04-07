@@ -38,6 +38,12 @@ make clean
 ## Project Structure
 
 ```
+├── .github/
+│   ├── copilot-instructions.md          # Repo-wide Copilot instructions
+│   ├── copilot-setup-steps.yml          # Copilot coding agent setup
+│   └── instructions/
+│       ├── backend.instructions.md      # Backend-specific instructions
+│       └── frontend.instructions.md     # Frontend-specific instructions
 ├── backend/
 │   ├── app/
 │   │   ├── api/v1/items.py       # REST endpoints
@@ -46,15 +52,13 @@ make clean
 │   │   ├── services/item_service.py  # Business logic (CRUD)
 │   │   └── core/                 # Config, database setup
 │   ├── tests/                    # pytest + httpx async tests
-│   ├── main.py                   # FastAPI app entry point
-│   └── CLAUDE.md                 # AI coding conventions (backend)
+│   └── main.py                   # FastAPI app entry point
 ├── frontend/
 │   ├── src/
 │   │   ├── pages/HomePage.tsx    # Landing page
 │   │   ├── services/itemApi.ts   # API client + React Query hooks
 │   │   ├── types/index.ts        # TypeScript interfaces
 │   │   └── components/ui/        # Reusable UI components
-│   └── CLAUDE.md                 # AI coding conventions (frontend)
 ├── docker/
 │   ├── Dockerfile
 │   ├── docker-compose.yml
@@ -99,4 +103,9 @@ make clean
 
 ## AI-Assisted Development
 
-This template includes `CLAUDE.md` files in both `backend/` and `frontend/` directories. These files contain architecture rules, coding conventions, and step-by-step guides that AI coding assistants can use to generate code that follows the project's patterns.
+This template includes GitHub Copilot coding agent configuration files under `.github/`:
+
+- **`.github/copilot-instructions.md`** — repo-wide instructions (tech stack, commands, architecture overview, adding a new feature)
+- **`.github/instructions/backend.instructions.md`** — backend-specific rules and conventions (scoped to `backend/**`)
+- **`.github/instructions/frontend.instructions.md`** — frontend-specific rules and conventions (scoped to `frontend/**`)
+- **`.github/copilot-setup-steps.yml`** — environment setup for the Copilot coding agent VM
