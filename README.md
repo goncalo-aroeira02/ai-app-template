@@ -109,3 +109,58 @@ This template includes GitHub Copilot coding agent configuration files under `.g
 - **`.github/instructions/backend.instructions.md`** — backend-specific rules and conventions (scoped to `backend/**`)
 - **`.github/instructions/frontend.instructions.md`** — frontend-specific rules and conventions (scoped to `frontend/**`)
 - **`.github/copilot-setup-steps.yml`** — environment setup for the Copilot coding agent VM
+## AI-Coding Tutorial
+
+1. Refine requirements with this prompt:
+```
+You're a senior software engineer. We're going to build the PRD of a feature
+together.
+
+VERY IMPORTANT:
+- Ask one question at a time
+- Each question should be based on previous answers
+- Go deeper on every important detail required
+
+IDEA:
+<paste here your task description>
+
+2. When you are done dump summary in specs.md file:
+```
+Compile those findings into a PRD. Use markdown format. It should contain the
+following sections:
+
+- Feature overview
+- Core requirements
+- Core features
+- Core components
+- App/user flow
+- Techstack
+- Implementation plan
+```
+
+3. Create an Implementation plan.md with:
+```
+Based on the generated PRD, create a detailed step-by-step plan to build this feature.
+Then break it down into small tasks that build on each other.
+Based on those tasks, break them into smaller subtasks.
+Make sure the steps are small enough to be implemented in a step but big enough
+to finish the project with success.
+Use best practices of software development and project management, no big
+complexity jumps. Wire tasks into others, creating a dependency list. There
+should be no orphan tasks.
+
+VERY IMPORTANT:
+- Use markdown or asciidoc 
+- Each task and subtask should be a checklist item
+- Provide context enough per task so a developer should be able to implement it
+- Each task should have a number id
+- Each task should list dependent task ids
+```
+
+4. Finally implement the plan with:
+```
+You're a senior software engineer. Study @docs/specs.md and implement what's
+still missing in @docs/plan.md. Implement each task each time and respect task
+and subtask dependencies. Once finished a task, check it in the list and move
+to the next.
+```
