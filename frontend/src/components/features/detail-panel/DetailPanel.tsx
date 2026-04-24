@@ -3,15 +3,35 @@ import { InitiativeDetail } from "./InitiativeDetail";
 import { EntityDetail } from "./EntityDetail";
 import { FeatureDetail } from "./FeatureDetail";
 import { StoryDetail } from "./StoryDetail";
-import type { SelectedItem } from "@/pages/ManagerPage";
+import { InitiativeListView } from "./InitiativeListView";
+import { EntityListView } from "./EntityListView";
+import { FeatureListView } from "./FeatureListView";
+import { StoryListView } from "./StoryListView";
+import type { SelectedItem, ActiveTab } from "@/pages/ManagerPage";
+import type { InitiativeTree } from "@/types";
 
 interface DetailPanelProps {
   selectedItem: SelectedItem | null;
+  activeTab: ActiveTab | null;
+  tree: InitiativeTree[];
   onClearSelection: () => void;
   onSelect: (item: SelectedItem) => void;
 }
 
-export function DetailPanel({ selectedItem, onClearSelection, onSelect }: DetailPanelProps) {
+export function DetailPanel({ selectedItem, activeTab, tree, onClearSelection, onSelect }: DetailPanelProps) {
+  if (activeTab) {
+    switch (activeTab) {
+      case "initiatives":
+        return <InitiativeListView tree={tree} onSelect={onSelect} />;
+      case "entities":
+        return <EntityListView tree={tree} onSelect={onSelect} />;
+      case "features":
+        return <FeatureListView tree={tree} onSelect={onSelect} />;
+      case "stories":
+        return <StoryListView tree={tree} onSelect={onSelect} />;
+    }
+  }
+
   if (!selectedItem) {
     return <EmptyState />;
   }
