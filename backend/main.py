@@ -1,27 +1,15 @@
-from contextlib import asynccontextmanager
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.ext.asyncio import create_async_engine
 
-from app.api.v1.items import router as items_router
-from app.api.v1.dictionary import router as dictionary_router
-from app.core.config import get_settings
-from app.models.base import Base
-import app.models.item  # noqa: F401
-import app.models.word  # noqa: F401
+from app.api.v1.initiatives import router as initiatives_router
+from app.api.v1.entities import router as entities_router
+from app.api.v1.features import nested_router as features_nested_router
+from app.api.v1.features import flat_router as features_flat_router
+from app.api.v1.stories import nested_router as stories_nested_router
+from app.api.v1.stories import flat_router as stories_flat_router
+from app.api.v1.tree import router as tree_router
 
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    engine = create_async_engine(get_settings().database_url)
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-    await engine.dispose()
-    yield
-
-
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(title="Product Initiative Manager")
 
 app.add_middleware(
     CORSMiddleware,
@@ -31,13 +19,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(items_router, prefix="/api/v1")
-app.include_router(dictionary_router, prefix="/api/v1")
+app.include_router(initiatives_router, prefix="/api/v1")
+app.include_router(entities_router, prefix="/api/v1")
+app.include_router(features_nested_router, prefix="/api/v1")
+app.include_router(features_flat_router, prefix="/api/v1")
+app.include_router(stories_nested_router, prefix="/api/v1")
+app.include_router(stories_flat_router, prefix="/api/v1")
+app.include_router(tree_router, prefix="/api/v1")
 
 
 @app.get("/")
 async def read_root():
-    return {"message": "Hello, world!"}
+    return {"message": "Product Initiative Manager API"}
 
 
 @app.get("/health")
