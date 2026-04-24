@@ -1,17 +1,17 @@
-# Full-Stack App Template
+# Product Initiative Manager
 
-A reusable full-stack template for AI-assisted development with Docker, FastAPI, React, Poetry, and Vite.
+A GitHub-synced Gherkin feature file manager for product teams. Organizes work across a 4-level hierarchy — **Initiatives → Entities → Features → User Stories** — using a GitHub repository as the single source of truth.
 
 ## Tech Stack
 
-| Layer    | Technology                          |
-|----------|-------------------------------------|
-| Backend  | Python 3.12+, FastAPI, SQLAlchemy 2 |
-| Frontend | React 19, TypeScript, Vite, Tailwind CSS 4 |
-| Database | SQLite (async via aiosqlite)        |
-| State    | TanStack React Query 5             |
-| Routing  | React Router 7                      |
-| Tooling  | Docker Compose, Poetry, npm        |
+| Layer    | Technology                                          |
+|----------|-----------------------------------------------------|
+| Backend  | Python 3.12+, FastAPI, PyGithub, gherkin-official   |
+| Frontend | React 19, TypeScript, Vite, Tailwind CSS 4          |
+| Storage  | GitHub repository (no database)                      |
+| State    | TanStack React Query 5                               |
+| Routing  | React Router 7                                       |
+| Tooling  | Docker Compose, Poetry, npm                          |
 
 ## Quick Start
 
@@ -40,63 +40,104 @@ make clean
 ```
 ├── backend/
 │   ├── app/
-│   │   ├── api/v1/items.py       # REST endpoints
-│   │   ├── models/item.py        # SQLAlchemy ORM model
-│   │   ├── schemas/item.py       # Pydantic request/response schemas
-│   │   ├── services/item_service.py  # Business logic (CRUD)
-│   │   └── core/                 # Config, database setup
-│   ├── tests/                    # pytest + httpx async tests
-│   ├── main.py                   # FastAPI app entry point
-│   └── CLAUDE.md                 # AI coding conventions (backend)
+│   │   ├── api/v1/               # REST endpoints (initiatives, entities, features, stories)
+│   │   ├── schemas/              # Pydantic request/response schemas
+│   │   ├── services/             # Business logic + GitHub API calls
+│   │   ├── gherkin/              # Gherkin parser and serializer
+│   │   └── core/                 # Config, GitHub client
+│   ├── tests/                    # pytest + mocked GitHub API
+│   └── main.py                   # FastAPI app entry point
 ├── frontend/
 │   ├── src/
-│   │   ├── pages/HomePage.tsx    # Landing page
-│   │   ├── services/itemApi.ts   # API client + React Query hooks
-│   │   ├── types/index.ts        # TypeScript interfaces
-│   │   └── components/ui/        # Reusable UI components
-│   └── CLAUDE.md                 # AI coding conventions (frontend)
+│   │   ├── pages/                # ManagerPage (sidebar + detail panel)
+│   │   ├── services/             # API clients + React Query hooks
+│   │   ├── types/                # TypeScript interfaces
+│   │   └── components/           # ui/, features/sidebar/, features/detail-panel/, features/gherkin/
 ├── docker/
 │   ├── Dockerfile
 │   ├── docker-compose.yml
 │   └── start.sh
+├── docs/
+│   ├── specs.md                  # Product Requirements Document
+│   └── template-guide.md         # Detailed guide for using this template
+├── CLAUDE.md                     # Root-level Claude Code instructions
 └── Makefile                      # Build, run, test commands
 ```
 
+## How It Works
+
+### Filesystem as Data Model
+
+The app manages Gherkin `.feature` files stored in a GitHub repository:
+
+```
+initiatives/
+├── improve-onboarding/
+│   ├── authentication/
+│   │   ├── login-flow.feature
+│   │   └── password-reset.feature
+│   └── user-profile/
+│       └── profile-setup.feature
+└── payments-revamp/
+    └── transactions/
+        ├── payment-processing.feature
+        └── refund-handling.feature
+```
+
+- **Initiative** = top-level folder (strategic goal/theme)
+- **Entity** = subfolder (domain sub-group like "authentication", "transactions")
+- **Feature** = `.feature` file (Gherkin format with BDD scenarios)
+- **User Story** = `Scenario` block inside a feature file
+
+### Metadata via Gherkin Tags
+
+Status, priority, and story points are encoded as tags directly in the `.feature` files:
+
+```gherkin
+@status-active @priority-high
+Feature: Login Flow
+  As a user, I want to log in securely so that I can access my account.
+
+  @status-in_progress @priority-high @points-5
+  Scenario: Successful login with valid credentials
+    Given I am on the login page
+    When I enter valid credentials
+    Then I should be redirected to the dashboard
+```
+
+### Two-Way GitHub Sync
+
+- UI edits → committed to GitHub via the GitHub API
+- GitHub edits (PRs, direct commits) → reflected in the UI on next load
+- SHA-based concurrency prevents conflicting overwrites
+
 ## Architecture Overview
 
-**Backend** follows a three-layer architecture:
-- **Router** (`api/v1/`) — HTTP endpoints, input validation
-- **Service** (`services/`) — business logic, database queries
-- **Model** (`models/`) — SQLAlchemy ORM definitions
+**Backend** (Router → Service → GitHub API):
+- **Routers** (`api/v1/`) — HTTP endpoints, input validation
+- **Services** (`services/`) — business logic, Gherkin parsing, GitHub API calls
+- **Gherkin** (`gherkin/`) — parser and serializer for `.feature` files
 
-**Frontend** separates concerns:
-- **Pages** — route-level components
+**Frontend** (Sidebar + Detail Panel):
+- **Sidebar** — collapsible 4-level tree navigation
+- **Detail Panel** — view/edit forms with Gherkin step editor
 - **Services** — API calls via `apiFetch` + React Query hooks
-- **Types** — TypeScript interfaces mirroring backend schemas
-
-## Adding a New Feature
-
-### Backend
-1. Create ORM model in `app/models/`
-2. Create Pydantic schemas in `app/schemas/` (Create, Update, Response)
-3. Create async service functions in `app/services/`
-4. Create router with endpoints in `app/api/v1/`
-5. Register router in `main.py`
-6. Add tests in `tests/`
-
-### Frontend
-1. Add TypeScript types in `src/types/index.ts`
-2. Create API service + React Query hooks in `src/services/`
-3. Create page component in `src/pages/`
-4. Add route in `src/App.tsx`
 
 ## Environment Variables
 
-| Variable         | Default                             | Description       |
-|------------------|-------------------------------------|-------------------|
-| `APP_DATABASE_URL` | `sqlite+aiosqlite:///./app.db`    | Database URL      |
-| `VITE_API_URL`   | `http://localhost:8000`             | Backend API URL   |
+| Variable                 | Default                  | Description                    |
+|--------------------------|--------------------------|--------------------------------|
+| `APP_GITHUB_TOKEN`       | (required)               | GitHub API token               |
+| `APP_GITHUB_REPO`        | (required)               | Target repo (`owner/repo`)     |
+| `APP_GITHUB_BRANCH`      | `main`                   | Branch to read/write files     |
+| `APP_FEATURES_BASE_PATH` | `initiatives/`           | Root path for initiative folders |
+| `VITE_API_URL`           | `http://localhost:8000`  | Backend API URL                |
 
 ## AI-Assisted Development
 
-This template includes `CLAUDE.md` files in both `backend/` and `frontend/` directories. These files contain architecture rules, coding conventions, and step-by-step guides that AI coding assistants can use to generate code that follows the project's patterns.
+This project includes `CLAUDE.md` files for Claude Code:
+
+- **`CLAUDE.md`** (root) — repo-wide instructions (architecture, commands, domain model, endpoints)
+- **`backend/CLAUDE.md`** — backend-specific rules (GitHub API patterns, Gherkin conventions, testing)
+- **`frontend/CLAUDE.md`** — frontend-specific rules (component structure, React Query patterns, badge colors)
+- **`docs/specs.md`** — full Product Requirements Document
