@@ -1,34 +1,35 @@
-import pytest
-import pytest_asyncio
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
-from httpx import AsyncClient, ASGITransport
+"""Test fixtures with mocked GitHub client."""
 
-from app.models.base import Base
-from app.core.database import get_session
+from pathlib import Path
+from unittest.mock import MagicMock
+
+import pytest
+from httpx import ASGITransport, AsyncClient
+
+from app.core.github_client import GitHubClient, get_github_client
 from main import app
 
-TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
+FIXTURES = Path(__file__).parent / "fixtures"
 
 
-@pytest_asyncio.fixture
-async def db_session():
-    engine = create_async_engine(TEST_DATABASE_URL, echo=False)
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-    session_factory = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
-    async with session_factory() as session:
-        yield session
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
-    await engine.dispose()
+def load_fixture(name: str) -> str:
+    return (FIXTURES / name).read_text()
 
 
-@pytest_asyncio.fixture
-async def async_client(db_session: AsyncSession):
-    async def override_get_session():
-        yield db_session
+@pytest.fixture
+def mock_github_client():
+    """Return a MagicMock that stands in for GitHubClient."""
+    mock = MagicMock(spec=GitHubClient)
+    mock.base_path = "initiatives"
+    mock.branch = "main"
+    return mock
 
-    app.dependency_overrides[get_session] = override_get_session
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+
+@pytest.fixture
+async def async_client(mock_github_client):
+    """AsyncClient with the GitHub client dependency overridden."""
+    app.dependency_overrides[get_github_client] = lambda: mock_github_client
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
         yield client
     app.dependency_overrides.clear()
