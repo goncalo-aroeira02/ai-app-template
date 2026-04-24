@@ -26,6 +26,7 @@ export function FeatureListView({ tree, onSelect }: FeatureListViewProps) {
   const [featureUsecase, setFeatureUsecase] = useState("");
   const [featureInitiativeTag, setFeatureInitiativeTag] = useState("");
   const [featureIntegration, setFeatureIntegration] = useState("");
+  const [search, setSearch] = useState("");
   const createFeatureMutation = useCreateFeature();
 
   const entityOptions = tree.flatMap((init) =>
@@ -174,8 +175,17 @@ export function FeatureListView({ tree, onSelect }: FeatureListViewProps) {
           </form>
         </div>
       )}
+      <div className="mb-4">
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search features..."
+          className="w-full rounded-xl border border-dark/20 bg-white px-4 py-2.5 text-sm text-dark placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent/50"
+        />
+      </div>
       <div className="space-y-2">
-        {features.map((feature) => (
+        {features.filter((f) => f.title.toLowerCase().includes(search.toLowerCase()) || f.breadcrumb.toLowerCase().includes(search.toLowerCase())).map((feature) => (
           <div
             key={`${feature.initiativeSlug}/${feature.entitySlug}/${feature.slug}`}
             className="flex items-center gap-3 px-4 py-3 rounded-2xl border border-dark/10 bg-bg-base cursor-pointer hover:border-accent/50 hover:shadow-sm transition-all text-sm"

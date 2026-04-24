@@ -22,6 +22,7 @@ export function StoryListView({ tree, onSelect }: StoryListViewProps) {
   const [showForm, setShowForm] = useState(false);
   const [selectedFeature, setSelectedFeature] = useState("");
   const [storyTitle, setStoryTitle] = useState("");
+  const [search, setSearch] = useState("");
   const createStoryMutation = useCreateStory();
 
   const featureOptions = tree.flatMap((init) =>
@@ -133,8 +134,17 @@ export function StoryListView({ tree, onSelect }: StoryListViewProps) {
           </form>
         </div>
       )}
+      <div className="mb-4">
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search stories..."
+          className="w-full rounded-xl border border-dark/20 bg-white px-4 py-2.5 text-sm text-dark placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent/50"
+        />
+      </div>
       <div className="space-y-2">
-        {stories.map((story) => (
+        {stories.filter((s) => s.title.toLowerCase().includes(search.toLowerCase()) || s.breadcrumb.toLowerCase().includes(search.toLowerCase())).map((story) => (
           <div
             key={`${story.initiativeSlug}/${story.entitySlug}/${story.featureSlug}/${story.index}`}
             className="flex items-center gap-3 px-4 py-3 rounded-2xl border border-dark/10 bg-bg-base cursor-pointer hover:border-accent/50 hover:shadow-sm transition-all text-sm"

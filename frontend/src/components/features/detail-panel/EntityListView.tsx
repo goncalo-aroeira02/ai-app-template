@@ -13,6 +13,7 @@ export function EntityListView({ tree, onSelect }: EntityListViewProps) {
   const [showForm, setShowForm] = useState(false);
   const [selectedInitiative, setSelectedInitiative] = useState("");
   const [entityName, setEntityName] = useState("");
+  const [search, setSearch] = useState("");
   const createEntityMutation = useCreateEntity();
 
   const entities = tree.flatMap((init) =>
@@ -86,8 +87,17 @@ export function EntityListView({ tree, onSelect }: EntityListViewProps) {
           </form>
         </div>
       )}
+      <div className="mb-4">
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search entities..."
+          className="w-full rounded-xl border border-dark/20 bg-white px-4 py-2.5 text-sm text-dark placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent/50"
+        />
+      </div>
       <div className="space-y-2">
-        {entities.map((entity) => (
+        {entities.filter((e) => e.name.toLowerCase().includes(search.toLowerCase()) || e.initiativeName.toLowerCase().includes(search.toLowerCase())).map((entity) => (
           <div
             key={`${entity.initiativeSlug}/${entity.slug}`}
             className="flex items-center gap-3 px-4 py-3 rounded-2xl border border-dark/10 bg-bg-base cursor-pointer hover:border-accent/50 hover:shadow-sm transition-all text-sm"
