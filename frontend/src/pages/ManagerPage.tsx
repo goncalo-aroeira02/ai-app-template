@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { SidebarTree } from "@/components/features/sidebar/SidebarTree";
 import { DetailPanel } from "@/components/features/detail-panel/DetailPanel";
-import { useCreateInitiative } from "@/services/initiativeApi";
+import { useCreateInitiative, useInitiativeTree } from "@/services/initiativeApi";
+import { cn } from "@/lib/utils";
 
 export interface SelectedItem {
   type: "initiative" | "entity" | "feature" | "story";
@@ -12,11 +13,32 @@ export interface SelectedItem {
   storyIndex?: number;
 }
 
+export type ActiveTab = "initiatives" | "entities" | "features" | "stories";
+
+const TABS: { key: ActiveTab; label: string }[] = [
+  { key: "initiatives", label: "Initiatives" },
+  { key: "entities", label: "Entities" },
+  { key: "features", label: "Features" },
+  { key: "stories", label: "Stories" },
+];
+
 export function ManagerPage() {
   const [selectedItem, setSelectedItem] = useState<SelectedItem | null>(null);
+  const [activeTab, setActiveTab] = useState<ActiveTab | null>(null);
   const [showInitForm, setShowInitForm] = useState(false);
   const [initName, setInitName] = useState("");
   const createMutation = useCreateInitiative();
+  const { data: tree } = useInitiativeTree();
+
+  const handleTabClick = (tab: ActiveTab) => {
+    setActiveTab(tab);
+    setSelectedItem(null);
+  };
+
+  const handleSelect = (item: SelectedItem) => {
+    setSelectedItem(item);
+    setActiveTab(null);
+  };
 
   const handleCreateInitiative = (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,7 +49,7 @@ export function ManagerPage() {
         onSuccess: (initiative) => {
           setInitName("");
           setShowInitForm(false);
-          setSelectedItem({ type: "initiative", initiativeSlug: initiative.slug });
+          handleSelect({ type: "initiative", initiativeSlug: initiative.slug });
         },
       }
     );
@@ -40,15 +62,23 @@ export function ManagerPage() {
         <div className="mx-auto flex items-center justify-between px-6 py-4">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-accent">
-              <span className="text-lg font-bold text-dark">P</span>
+              <span className="text-lg font-bold text-dark">E</span>
             </div>
-            <h1 className="text-xl font-bold text-dark">Product Manager Portal</h1>
+            <h1 className="text-xl font-bold text-dark">Ebury Gherkin Portal</h1>
           </div>
           <nav className="hidden md:flex items-center gap-6 text-sm text-muted">
-            <span className="text-dark font-medium">Initiatives</span>
-            <span className="cursor-default">Entities</span>
-            <span className="cursor-default">Features</span>
-            <span className="cursor-default">Stories</span>
+            {TABS.map((tab) => (
+              <span
+                key={tab.key}
+                className={cn(
+                  "cursor-pointer transition-colors hover:text-dark",
+                  activeTab === tab.key && "text-dark font-medium"
+                )}
+                onClick={() => handleTabClick(tab.key)}
+              >
+                {tab.label}
+              </span>
+            ))}
           </nav>
           <Button variant="accent" onClick={() => setShowInitForm(true)}>
             + New Initiative
@@ -88,7 +118,7 @@ export function ManagerPage() {
             <h2 className="mb-4 px-2 text-xs font-semibold uppercase tracking-wider text-muted">
               Explorer
             </h2>
-            <SidebarTree selectedItem={selectedItem} onSelect={setSelectedItem} />
+            <SidebarTree selectedItem={selectedItem} onSelect={handleSelect} />
           </div>
         </aside>
 
@@ -97,8 +127,10 @@ export function ManagerPage() {
           <div className="rounded-3xl border border-dark/10 bg-bg-surface p-8 shadow-sm min-h-[calc(100vh-12rem)]">
             <DetailPanel
               selectedItem={selectedItem}
-              onClearSelection={() => setSelectedItem(null)}
-              onSelect={setSelectedItem}
+              activeTab={activeTab}
+              tree={tree ?? []}
+              onClearSelection={() => { setSelectedItem(null); setActiveTab(null); }}
+              onSelect={handleSelect}
             />
           </div>
         </main>
