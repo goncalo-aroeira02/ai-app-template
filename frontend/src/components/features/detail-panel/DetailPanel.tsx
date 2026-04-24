@@ -41,6 +41,7 @@ export function DetailPanel({ selectedItem, activeTab, tree, onClearSelection, o
       return (
         <InitiativeDetail
           initiativeSlug={selectedItem.initiativeSlug}
+          tree={tree}
           onClearSelection={onClearSelection}
           onSelect={onSelect}
         />
@@ -50,6 +51,7 @@ export function DetailPanel({ selectedItem, activeTab, tree, onClearSelection, o
         <EntityDetail
           initiativeSlug={selectedItem.initiativeSlug}
           entitySlug={selectedItem.entitySlug!}
+          tree={tree}
           onClearSelection={onClearSelection}
           onSelect={onSelect}
         />

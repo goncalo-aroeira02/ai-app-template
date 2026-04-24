@@ -2,16 +2,19 @@ import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { useDeleteInitiative } from "@/services/initiativeApi";
 import { useCreateEntity } from "@/services/entityApi";
+import type { InitiativeTree } from "@/types";
 import type { SelectedItem } from "@/pages/ManagerPage";
 
 interface InitiativeDetailProps {
   initiativeSlug: string;
+  tree: InitiativeTree[];
   onClearSelection: () => void;
   onSelect: (item: SelectedItem) => void;
 }
 
 export function InitiativeDetail({
   initiativeSlug,
+  tree,
   onClearSelection,
   onSelect,
 }: InitiativeDetailProps) {
@@ -76,6 +79,37 @@ export function InitiativeDetail({
           </div>
         )}
       </div>
+
+      {(() => {
+        const initiative = tree.find((i) => i.slug === initiativeSlug);
+        const entities = initiative?.entities ?? [];
+        return (
+          <div className="mb-6">
+            <h3 className="text-sm font-semibold text-muted uppercase tracking-wider mb-3">
+              Entities ({entities.length})
+            </h3>
+            {entities.length === 0 ? (
+              <p className="text-sm text-muted">No entities yet.</p>
+            ) : (
+              <div className="space-y-2">
+                {entities.map((entity) => (
+                  <div
+                    key={entity.slug}
+                    className="flex items-center gap-3 px-4 py-3 rounded-2xl border border-dark/10 bg-bg-base cursor-pointer hover:border-accent/50 hover:shadow-sm transition-all text-sm"
+                    onClick={() => onSelect({ type: "entity", initiativeSlug, entitySlug: entity.slug })}
+                  >
+                    <span className="text-sm">👤</span>
+                    <span className="flex-1 font-medium text-dark">{entity.name}</span>
+                    <span className="text-xs text-muted">
+                      {entity.feature_count} feature{entity.feature_count !== 1 ? "s" : ""}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       <div className="border-t border-dark/10 pt-4">
         <Button variant="ghost" onClick={handleDelete} disabled={deleteMutation.isPending}>
