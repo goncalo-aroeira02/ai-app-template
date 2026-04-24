@@ -57,39 +57,48 @@ export function EntityDetail({
 
   return (
     <div>
-      <h2 className="text-xl font-semibold mb-1">
-        {entitySlug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
-      </h2>
-      <p className="text-sm text-zinc-400 mb-6">
-        Entity in {initiativeSlug}
-      </p>
+      <div className="mb-6">
+        <span className="inline-block rounded-lg bg-dark px-3 py-1 text-xs font-semibold text-white mb-3">
+          Entity
+        </span>
+        <h2 className="text-2xl font-bold text-dark">
+          {entitySlug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
+        </h2>
+        <p className="text-sm text-muted mt-1">
+          Part of {initiativeSlug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
+        </p>
+      </div>
 
       <div className="mb-6">
         {!showForm ? (
-          <Button onClick={() => setShowForm(true)}>+ New Feature</Button>
+          <Button variant="accent" onClick={() => setShowForm(true)}>+ New Feature</Button>
         ) : (
-          <form onSubmit={handleCreateFeature} className="flex gap-2">
-            <input
-              type="text"
-              value={featureTitle}
-              onChange={(e) => setFeatureTitle(e.target.value)}
-              placeholder="Feature title..."
-              className="flex-1 bg-zinc-800 border border-zinc-700 rounded px-3 py-2 text-sm text-white"
-              autoFocus
-            />
-            <Button type="submit" disabled={createFeatureMutation.isPending}>
-              Create
-            </Button>
-            <Button variant="ghost" onClick={() => setShowForm(false)}>
-              Cancel
-            </Button>
-          </form>
+          <div className="rounded-2xl border border-dark/10 bg-bg-base p-4">
+            <form onSubmit={handleCreateFeature} className="flex gap-2">
+              <input
+                type="text"
+                value={featureTitle}
+                onChange={(e) => setFeatureTitle(e.target.value)}
+                placeholder="Feature title..."
+                className="flex-1 rounded-xl border border-dark/20 bg-white px-4 py-2.5 text-sm text-dark placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent/50"
+                autoFocus
+              />
+              <Button variant="primary" type="submit" disabled={createFeatureMutation.isPending}>
+                Create
+              </Button>
+              <Button variant="ghost" onClick={() => setShowForm(false)}>
+                Cancel
+              </Button>
+            </form>
+          </div>
         )}
       </div>
 
-      <Button variant="ghost" onClick={handleDelete} disabled={deleteMutation.isPending}>
-        Delete Entity
-      </Button>
+      <div className="border-t border-dark/10 pt-4">
+        <Button variant="ghost" onClick={handleDelete} disabled={deleteMutation.isPending}>
+          Delete Entity
+        </Button>
+      </div>
     </div>
   );
 }

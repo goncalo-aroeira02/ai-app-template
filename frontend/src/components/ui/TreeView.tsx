@@ -26,8 +26,8 @@ export function TreeView({
     <div>
       <div
         className={cn(
-          "flex items-center gap-1 px-2 py-1 rounded cursor-pointer text-sm hover:bg-zinc-800",
-          isSelected && "bg-zinc-800 text-white"
+          "flex items-center gap-2 px-3 py-2 rounded-xl cursor-pointer text-sm transition-colors hover:bg-dark/5",
+          isSelected && "bg-accent/20 text-dark font-medium"
         )}
         onClick={(e) => {
           e.stopPropagation();
@@ -36,16 +36,16 @@ export function TreeView({
         }}
       >
         {!isLeaf && (
-          <span className="w-4 text-xs text-zinc-500 select-none">
-            {isExpanded ? "▼" : "▶"}
+          <span className={cn("w-4 text-xs text-muted select-none transition-transform", isExpanded && "rotate-90")}>
+            ▶
           </span>
         )}
         {isLeaf && <span className="w-4" />}
-        {icon && <span className="text-xs">{icon}</span>}
+        {icon && <span className="text-sm">{icon}</span>}
         <span className="truncate">{label}</span>
       </div>
       {isExpanded && children && (
-        <div className="ml-3 border-l border-zinc-800">{children}</div>
+        <div className="ml-4 border-l-2 border-accent/30 pl-1">{children}</div>
       )}
     </div>
   );

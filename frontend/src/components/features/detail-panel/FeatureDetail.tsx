@@ -7,6 +7,15 @@ import type { Status } from "@/types";
 
 const STATUSES: Status[] = ["draft", "active", "in_progress", "done", "completed", "archived"];
 
+const STATUS_STYLES: Record<Status, string> = {
+  draft: "bg-dark/10 text-dark",
+  active: "bg-accent text-dark",
+  in_progress: "bg-blue-100 text-blue-800",
+  done: "bg-green-100 text-green-800",
+  completed: "bg-green-200 text-green-900",
+  archived: "bg-dark/5 text-muted",
+};
+
 interface FeatureDetailProps {
   initiativeSlug: string;
   entitySlug: string;
@@ -35,7 +44,7 @@ export function FeatureDetail({
   const [showStoryForm, setShowStoryForm] = useState(false);
 
   if (isLoading || !feature) {
-    return <p className="text-zinc-500">Loading...</p>;
+    return <p className="text-muted">Loading...</p>;
   }
 
   const startEdit = () => {
@@ -102,31 +111,31 @@ export function FeatureDetail({
   if (editing) {
     return (
       <div className="space-y-4">
-        <h2 className="text-lg font-semibold">Edit Feature</h2>
+        <h2 className="text-lg font-bold text-dark">Edit Feature</h2>
         <input
           type="text"
           value={editTitle}
           onChange={(e) => setEditTitle(e.target.value)}
-          className="w-full bg-zinc-800 border border-zinc-700 rounded px-3 py-2 text-sm text-white"
+          className="w-full rounded-xl border border-dark/20 bg-white px-4 py-2.5 text-sm text-dark focus:outline-none focus:ring-2 focus:ring-accent/50"
           placeholder="Title"
         />
         <textarea
           value={editDesc}
           onChange={(e) => setEditDesc(e.target.value)}
-          className="w-full bg-zinc-800 border border-zinc-700 rounded px-3 py-2 text-sm text-white h-24"
+          className="w-full rounded-xl border border-dark/20 bg-white px-4 py-2.5 text-sm text-dark h-24 focus:outline-none focus:ring-2 focus:ring-accent/50"
           placeholder="Description"
         />
         <select
           value={editStatus}
           onChange={(e) => setEditStatus(e.target.value as Status)}
-          className="bg-zinc-800 border border-zinc-700 rounded px-3 py-2 text-sm text-white"
+          className="rounded-xl border border-dark/20 bg-white px-4 py-2.5 text-sm text-dark focus:outline-none focus:ring-2 focus:ring-accent/50"
         >
           {STATUSES.map((s) => (
-            <option key={s} value={s}>{s}</option>
+            <option key={s} value={s}>{s.replace(/_/g, " ")}</option>
           ))}
         </select>
         <div className="flex gap-2">
-          <Button onClick={saveEdit} disabled={updateMutation.isPending}>Save</Button>
+          <Button variant="accent" onClick={saveEdit} disabled={updateMutation.isPending}>Save</Button>
           <Button variant="ghost" onClick={() => setEditing(false)}>Cancel</Button>
         </div>
       </div>
@@ -135,64 +144,77 @@ export function FeatureDetail({
 
   return (
     <div>
-      <div className="flex items-start justify-between mb-1">
-        <h2 className="text-xl font-semibold">{feature.title}</h2>
-        <span className="text-xs bg-zinc-800 px-2 py-1 rounded">{feature.status}</span>
+      <div className="flex items-start justify-between mb-2">
+        <div>
+          <span className="inline-block rounded-lg bg-accent/30 px-3 py-1 text-xs font-semibold text-dark mb-3">
+            Feature
+          </span>
+          <h2 className="text-2xl font-bold text-dark">{feature.title}</h2>
+        </div>
+        <span className={`rounded-xl px-3 py-1 text-xs font-medium ${STATUS_STYLES[feature.status]}`}>
+          {feature.status.replace(/_/g, " ")}
+        </span>
       </div>
-      <p className="text-sm text-zinc-400 mb-4">
-        Feature in {initiativeSlug}/{entitySlug}
+      <p className="text-sm text-muted mb-2">
+        {initiativeSlug} / {entitySlug}
       </p>
       {feature.description && (
-        <p className="text-sm text-zinc-300 mb-6">{feature.description}</p>
+        <p className="text-sm text-dark/70 mb-6">{feature.description}</p>
       )}
 
-      <div className="flex gap-2 mb-6">
-        <Button onClick={startEdit}>Edit</Button>
+      <div className="flex gap-2 mb-8">
+        <Button variant="primary" onClick={startEdit}>Edit</Button>
         <Button variant="ghost" onClick={handleDelete} disabled={deleteMutation.isPending}>
           Delete
         </Button>
       </div>
 
-      <h3 className="text-sm font-semibold text-zinc-400 mb-3">
-        User Stories ({feature.stories.length})
-      </h3>
-      <ul className="space-y-2 mb-4">
-        {feature.stories.map((story) => (
-          <li
-            key={story.index}
-            className="flex items-center gap-2 px-3 py-2 bg-zinc-800/50 rounded cursor-pointer hover:bg-zinc-800 text-sm"
-            onClick={() =>
-              onSelect({
-                type: "story",
-                initiativeSlug,
-                entitySlug,
-                featureSlug,
-                storyIndex: story.index,
-              })
-            }
-          >
-            <span className="flex-1">{story.title}</span>
-            <span className="text-xs text-zinc-500">{story.status}</span>
-          </li>
-        ))}
-      </ul>
+      <div className="border-t border-dark/10 pt-6">
+        <h3 className="text-sm font-semibold text-dark mb-4">
+          User Stories ({feature.stories.length})
+        </h3>
+        <div className="space-y-2 mb-4">
+          {feature.stories.map((story) => (
+            <div
+              key={story.index}
+              className="flex items-center gap-3 px-4 py-3 rounded-2xl border border-dark/10 bg-bg-base cursor-pointer hover:border-accent/50 hover:shadow-sm transition-all text-sm"
+              onClick={() =>
+                onSelect({
+                  type: "story",
+                  initiativeSlug,
+                  entitySlug,
+                  featureSlug,
+                  storyIndex: story.index,
+                })
+              }
+            >
+              <span className="flex-1 font-medium text-dark">{story.title}</span>
+              <span className={`rounded-lg px-2 py-0.5 text-xs font-medium ${STATUS_STYLES[story.status]}`}>
+                {story.status.replace(/_/g, " ")}
+              </span>
+            </div>
+          ))}
+        </div>
 
-      {!showStoryForm ? (
-        <Button onClick={() => setShowStoryForm(true)}>+ New Story</Button>
-      ) : (
-        <form onSubmit={handleCreateStory} className="flex gap-2">
-          <input
-            type="text"
-            value={storyTitle}
-            onChange={(e) => setStoryTitle(e.target.value)}
-            placeholder="Story title..."
-            className="flex-1 bg-zinc-800 border border-zinc-700 rounded px-3 py-2 text-sm text-white"
-            autoFocus
-          />
-          <Button type="submit" disabled={createStoryMutation.isPending}>Create</Button>
-          <Button variant="ghost" onClick={() => setShowStoryForm(false)}>Cancel</Button>
-        </form>
-      )}
+        {!showStoryForm ? (
+          <Button variant="accent" onClick={() => setShowStoryForm(true)}>+ New Story</Button>
+        ) : (
+          <div className="rounded-2xl border border-dark/10 bg-bg-base p-4">
+            <form onSubmit={handleCreateStory} className="flex gap-2">
+              <input
+                type="text"
+                value={storyTitle}
+                onChange={(e) => setStoryTitle(e.target.value)}
+                placeholder="Story title..."
+                className="flex-1 rounded-xl border border-dark/20 bg-white px-4 py-2.5 text-sm text-dark placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent/50"
+                autoFocus
+              />
+              <Button variant="primary" type="submit" disabled={createStoryMutation.isPending}>Create</Button>
+              <Button variant="ghost" onClick={() => setShowStoryForm(false)}>Cancel</Button>
+            </form>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
